@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "racesim-backend"
+version = "0.1.0"
+description = ""
+authors = ["HiraiKyo <kyo.mikhael@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["all"], version = "^0.115.5"}
+pydantic = "^2.10.2"
+uvicorn = {extras = ["standard"], version = "^0.32.1"}
+pydantic-settings = "^2.6.1"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.1"
+taskipy = "^1.14.1"
+
+[tool.taskipy.tasks]
+dev = "uvicorn racesim_backend.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir racesim_backend --log-level debug"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+  
