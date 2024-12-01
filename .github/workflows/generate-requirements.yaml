@@ -1,0 +1,48 @@
+name: Generate Requirements
+
+on:
+  pull_request:
+    paths:
+      - 'pyproject.toml'
+      - 'poetry.lock'
+    types: [opened, synchronize]
+  workflow_dispatch:  # 手動実行用
+
+jobs:
+  generate-requirements:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}  # PRのブランチをチェックアウト
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+        
+      - name: Generate requirements.txt
+        run: |
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+          poetry export -f requirements.txt --output requirements-dev.txt --with dev --without-hashes
+          
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add requirements.txt requirements-dev.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update requirements.txt from poetry" && git push)
